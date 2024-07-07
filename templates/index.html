@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Storage</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #1542e3; /* Dark mode background */
+            color: #ffffff; /* Light text on dark background */
+        }
+        .container {
+            max-width: 800px;
+            width: auto;
+        }
+        .file-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-left: -10px;
+            margin-right: -10px;
+            background-color: #fbfbfd37;
+            border-radius: 10px;
+        }
+        .file-item {
+            width: calc(45% - 20px); /* Four items per row */
+            margin: 15px;
+            text-align: center;
+            position: relative;
+            background-color: #292b2f; /* Darker background for file items */
+            padding: 8px;
+            border-radius: 7px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 1); /* Shadow for each file item */
+            transition: transform 0.3s ease; /* Smooth transition for hover effect */
+            overflow: hidden; /* Prevent text overflow */
+        }
+        @media (min-width: 768px) {
+        .file-item {
+                width: calc(25% - 35px); /* Four items per row */
+            }
+        }
+        .file-item:hover {
+            transform: scale(1.37); /* Scale up on hover */
+            z-index: 100;
+        }
+        .file-item img,
+        .file-item i {
+            width: 64px;
+            height: auto;
+            display: block;
+            margin: 0 auto 10px; /* Center align icons and previews */
+            border-radius: 5px;
+        }
+        .file-item img {
+            display: none;
+            position: absolute;
+            top: -84px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            border: 1px solid #ffffff; /* White border for image previews */
+            background: #ffffff; /* White background for image previews */
+            padding: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Shadow for image previews */
+        }
+        .file-item:hover img {
+            display: block;
+        }
+        .file-name {
+            margin-top: 80px;
+            font-size: 14px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .file-actions {
+            background-color: #3d3e41;
+            margin: 10px;
+            padding-top: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            padding-bottom: -5px;
+        }
+        .file-icon
+        {
+            padding-top: 10px;
+            margin-top: 18px;
+            scale: 5;
+        }
+
+        .action-icon {
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 20px;
+            color: #ffffff; /* Light text on dark buttons */
+            transition: color 0.3s ease; /* Smooth transition for hover effect */
+
+        }
+        .action-icon:hover {
+            color: #17a2b8; /* Hover color */
+        }
+        .upload-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .upload-icon {
+            font-size: 64px;
+            cursor: pointer;
+            color: #ffffff;
+            transition: transform 0.3s ease; /* Smooth transition for hover effect */
+        }
+        .upload-icon:hover {
+            transform: scale(1.1); /* Scale up on hover */
+        }
+        .upload-label {
+            display: block;
+            color: #ffffff;
+            margin-top: 10px;
+        }
+
+        
+        .upload-status, .download-status {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #ffffff;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .upload-status.show, .download-status.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-5">
+        <h1 class="mb-4">File Storage</h1>
+        <div class="upload-container">
+            <label for="fileInput" class="upload-icon"><i class="fas fa-plus-circle"></i></label>
+            <input type="file" id="fileInput" style="display: none;">
+            <span class="upload-label" style="cursor:pointer;" onclick="uploadFile()">Click to Upload</span>
+            
+            <div id="uploadStatus" class="upload-status">
+                Uploading... <span id="uploadPercentage">0%</span>
+            </div>
+
+        </div>
+
+        <h2>Files</h2>
+        <!-- Example download status -->
+        <div id="downloadStatus" class="download-status">
+            Downloading... <span id="downloadPercentage">0%</span>
+        </div>
+
+        <div class="file-container" id="fileList">
+            <!-- <div class="file-item">
+               <div class="file-icon"><i class="fas fa-file-image "></i></div>
+                <div class="file-name">${wrapText(file, 15)}</div>
+                <div class="file-actions">
+                    <i class="action-icon fas fa-download" onclick="downloadFile('${file}')" title="Download"></i>
+                    <i class="action-icon fas fa-edit" onclick="renameFile('${file}')" title="Rename"></i>
+                    <i class="action-icon fas fa-trash-alt" onclick="deleteFile('${file}')" title="Delete"></i>
+                </div>
+            </div>
+            <div class="file-item">
+                
+                <div class="file-name">${wrapText(file, 15)}</div>
+                <div class="file-actions">
+                    <i class="action-icon fas fa-download" onclick="downloadFile('${file}')" title="Download"></i>
+                    <i class="action-icon fas fa-edit" onclick="renameFile('${file}')" title="Rename"></i>
+                    <i class="action-icon fas fa-trash-alt" onclick="deleteFile('${file}')" title="Delete"></i>
+                </div>
+            </div>
+            <div class="file-item">
+                <div class="file-icon"><i class="fas fa-file-word  "></i></div>
+                <div class="file-name">${wrapText(file, 15)}</div>
+                <div class="file-actions">
+                    <i class="action-icon fas fa-download" onclick="downloadFile('${file}')" title="Download"></i>
+                    <i class="action-icon fas fa-edit" onclick="renameFile('${file}')" title="Rename"></i>
+                    <i class="action-icon fas fa-trash-alt" onclick="deleteFile('${file}')" title="Delete"></i>
+                </div>
+            </div>
+            <div class="file-item">
+                <div class="file-icon"><i class="fas fa-file-word  "></i></div>
+                <div class="file-name">${wrapText(file, 15)}</div>
+                <div class="file-actions">
+                    <i class="action-icon fas fa-download" onclick="downloadFile('${file}')" title="Download"></i>
+                    <i class="action-icon fas fa-edit" onclick="renameFile('${file}')" title="Rename"></i>
+                    <i class="action-icon fas fa-trash-alt" onclick="deleteFile('${file}')" title="Delete"></i>
+                </div>
+            </div> -->
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+    function showUploadStatus(progress) {
+        var uploadStatus = document.getElementById('uploadStatus');
+        var uploadPercentage = document.getElementById('uploadPercentage');
+
+        uploadStatus.classList.add('show');
+        uploadPercentage.textContent = `${progress}%`;
+
+        setTimeout(function() {
+            uploadStatus.classList.remove('show');
+        }, 10000); // Hide after 3 seconds (adjust as needed)
+    }
+
+    function showDownloadStatus(progress) {
+        var downloadStatus = document.getElementById('downloadStatus');
+        var downloadPercentage = document.getElementById('downloadPercentage');
+
+        downloadStatus.classList.add('show');
+        downloadPercentage.textContent = `${progress}%`;
+
+        setTimeout(function() {
+            downloadStatus.classList.remove('show');
+        }, 3000); // Hide after 3 seconds (adjust as needed)
+    }
+
+
+    function getFileIcon(file) {
+        const ext = file.split('.').pop().toLowerCase();
+        switch (ext) {
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+                return `<div class="file-icon"><i class="fas fa-file-image  "></i></div>`;
+            case 'mkv':
+            case 'webm':
+            case 'mp4':
+                return `<div class="file-icon"><i class="fas fa-file-video  "></i></div>`;
+            case 'gif':
+                return `<img src="/download/${file}" alt="${file}">`;
+            case 'pdf':
+                return `<div class="file-icon"><i class="fas fa-file-pdf  "></i></div>`;
+            case 'doc':
+            case 'docx':
+                return `<div class="file-icon"><i class="fas fa-file-doc  "></i></div>`;
+            case 'xls':
+            case 'xlsx':
+                return `<div class="file-icon"><i class="fas fa-file-excel  "></i></div>`;
+            case 'ppt':
+            case 'pptx':
+                return `<div class="file-icon"><i class="fas fa-file-ppt  "></i></div>`;
+            case 'txt':
+                return `<div class="file-icon"><i class="fas fa-file-alt  "></i></div>`;
+            case 'zip':
+                return `<div class="file-icon"><i class="fas fa-file-archive  "></i></div>`;
+            default:
+                return `<div class="file-icon"><i class="fas fa-file-file  "></i></div>`;
+        }
+    }
+    
+    function listFiles() {
+        $.get('/files', function(files) {
+            $('#fileList').empty();
+            files.forEach(function(file) {
+                const icon = getFileIcon(file);
+                $('#fileList').append(`
+                    <div class="file-item">
+                        ${icon}
+                        <div class="file-name">${wrapText(file, 15)}</div>
+                        <div class="file-actions">
+                            <i class="action-icon fas fa-download" onclick="downloadFile('${file}')" title="Download"></i>
+                            <i class="action-icon fas fa-edit" onclick="renameFile('${file}')" title="Rename"></i>
+                            <i class="action-icon fas fa-trash-alt" onclick="deleteFile('${file}')" title="Delete"></i>
+                        </div>
+                    </div>
+                `);
+            });
+        });
+    }
+    
+    function wrapText(text, maxChars) {
+        if (text.length > maxChars) {
+            return text.slice(0, maxChars) + '...';
+        }
+        return text;
+    }
+    
+    function uploadFile() {
+    var fileInput = document.getElementById('fileInput');
+    var file = fileInput.files[0];
+    var formData = new FormData();
+    formData.append('file', file);
+
+    // Display initial upload status
+    showUploadStatus(0);
+
+    $.ajax({
+        url: '/upload',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        xhr: function() {
+            var xhr = new window.XMLHttpRequest();
+            // Upload progress
+            xhr.upload.addEventListener("progress", function(evt) {
+                if (evt.lengthComputable) {
+                    var percentComplete = Math.round((evt.loaded / evt.total) * 100);
+                    showUploadStatus(percentComplete); // Update upload status dynamically
+                }
+            }, false);
+            return xhr;
+        },
+        success: function(response) {
+            showUploadStatus(100); // Upload complete
+            listFiles(); // Refresh file list after upload
+        },
+        error: function(response) {
+            alert('File upload failed!');
+        }
+    });
+}
+
+
+function downloadFile(filename) {
+        // Display initial download status
+        showDownloadStatus(0);
+
+        fetch(`/download/${filename}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            showDownloadStatus(100); // Download complete
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        })
+        .catch(error => {
+            console.error('There has been a problem with your fetch operation:', error);
+            alert('File download failed!');
+        });
+    }
+
+    function renameFile(oldFilename) {
+        var newFilename = prompt("Enter new filename:", oldFilename);
+        if (newFilename) {
+            $.ajax({
+                url: '/rename',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ old_filename: oldFilename, new_filename: newFilename }),
+                success: function(response) {
+                    listFiles();
+                },
+                error: function(response) {
+                    alert('File rename failed!');
+                }
+            });
+        }
+    }
+    
+    function deleteFile(filename) {
+    $.ajax({
+        url: `/delete/${filename}`,
+        type: 'DELETE',
+        success: function(response) {
+            listFiles();
+        },
+        error: function(response) {
+            alert('File delete failed!');
+        }
+    });
+}
+
+// Initial file list load
+listFiles();
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrieve File</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Retrieve Your File</h2>
+        <form action="{{ url_for('retrieve_file') }}" method="post">
+            <div class="input-group">
+                <label for="code">Enter 6-digit code</label>
+                <input type="text" id="code" name="code" maxlength="6" pattern="\d{6}" required>
+            </div>
+            <button type="submit">Retrieve</button>
+        </form>
+        <a href="{{ url_for('index') }}">Upload a File</a>
+    </div>
+</body>
+</html>

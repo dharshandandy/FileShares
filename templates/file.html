@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Uploaded</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>File Uploaded Successfully!</h2>
+        <p>Your file has been uploaded. Use the following code to retrieve your file:</p>
+        <div class="code-display">{{ code }}</div>
+        <p>Filename: {{ filename }}</p>
+        <a href="{{ url_for('index') }}">Upload Another File</a>
+        <a href="{{ url_for('retrieve') }}">Retrieve a File</a>
+    </div>
+</body>
+</html>
